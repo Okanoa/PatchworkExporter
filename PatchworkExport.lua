@@ -64,17 +64,31 @@ onclick = function()
   local dataOut = {
     groups = {},
     spritesheet = app.fs.fileTitle(dlg.data.spriteData)..".png",
-    frames = {}
+    frames = {},
   }
 
   local offset = {x = 0, y = 0} -- potential per sprite/group offset would be nice tbh...
+  local cameraOffset = {x = nil, y = nil}
   
   local slice = data["meta"]["slices"]
-  if #slice > 0 then
-    local sliceBounds = slice[1]["keys"][1]["bounds"]
-    offset.x = sliceBounds.x
-    offset.y = sliceBounds.y
+
+  for i, sliceData in ipairs(slice) do
+    local sliceBounds = slice[i]["keys"][1]["bounds"]
+    
+    if slice[i]["name"] == "camera" then
+      cameraOffset.x = sliceBounds.x
+      cameraOffset.y = sliceBounds.y
+    else
+      offset.x = sliceBounds.x
+      offset.y = sliceBounds.y
+      if cameraOffset.x == nil then
+        cameraOffset.x = sliceBounds.x
+        cameraOffset.y = sliceBounds.y
+      end
+    end
   end
+
+  dataOut.camera = {x = cameraOffset.x-offset.x, y = cameraOffset.y-offset.y}
 
   -- frame atlas
   for i, framedat in ipairs(data["frames"]) do
